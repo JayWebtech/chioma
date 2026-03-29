@@ -12,7 +12,11 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import type { ManagedStellarAccount } from '@/lib/services/stellar-accounts.service';
-import { fetchNetworkAccountInfo, syncStellarAccount, exportAccountData } from '@/lib/services/stellar-accounts.service';
+import {
+  fetchNetworkAccountInfo,
+  syncStellarAccount,
+  exportAccountData,
+} from '@/lib/services/stellar-accounts.service';
 import { getStellarExpertAccountUrl } from '@/lib/stellar-network';
 import { StellarAccountBalance } from './StellarAccountBalance';
 import { StellarAccountHistory } from './StellarAccountHistory';
@@ -24,7 +28,10 @@ interface StellarAccountDetailProps {
   onSync?: (updated: ManagedStellarAccount) => void;
 }
 
-export function StellarAccountDetail({ account, onSync }: StellarAccountDetailProps) {
+export function StellarAccountDetail({
+  account,
+  onSync,
+}: StellarAccountDetailProps) {
   const [tab, setTab] = useState<Tab>('overview');
   const [copied, setCopied] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -77,7 +84,9 @@ export function StellarAccountDetail({ account, onSync }: StellarAccountDetailPr
               >
                 {account.isActive ? 'Active' : 'Inactive'}
               </span>
-              <span className="text-xs text-slate-500">{account.accountType}</span>
+              <span className="text-xs text-slate-500">
+                {account.accountType}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <p className="font-mono text-xs text-slate-300 truncate">
@@ -155,17 +164,28 @@ export function StellarAccountDetail({ account, onSync }: StellarAccountDetailPr
                 Account Info
               </p>
               {[
-                { label: 'Created', value: new Date(account.createdAt).toLocaleDateString() },
-                { label: 'Last Updated', value: new Date(account.updatedAt).toLocaleDateString() },
+                {
+                  label: 'Created',
+                  value: new Date(account.createdAt).toLocaleDateString(),
+                },
+                {
+                  label: 'Last Updated',
+                  value: new Date(account.updatedAt).toLocaleDateString(),
+                },
                 { label: 'Sequence Number', value: account.sequenceNumber },
                 {
                   label: 'Subentries',
                   value: networkInfo?.subentryCount?.toString() ?? '—',
                 },
               ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between items-center py-2 border-b border-white/5">
+                <div
+                  key={label}
+                  className="flex justify-between items-center py-2 border-b border-white/5"
+                >
                   <span className="text-xs text-slate-500">{label}</span>
-                  <span className="text-xs text-slate-300 font-mono">{value}</span>
+                  <span className="text-xs text-slate-300 font-mono">
+                    {value}
+                  </span>
                 </div>
               ))}
             </div>
@@ -186,15 +206,22 @@ export function StellarAccountDetail({ account, onSync }: StellarAccountDetailPr
             </div>
             {networkInfo?.signers?.length ? (
               networkInfo.signers.map((signer) => (
-                <div key={signer.key} className="px-3 py-2.5 rounded-lg bg-white/5">
-                  <p className="font-mono text-xs text-slate-300 truncate">{signer.key}</p>
+                <div
+                  key={signer.key}
+                  className="px-3 py-2.5 rounded-lg bg-white/5"
+                >
+                  <p className="font-mono text-xs text-slate-300 truncate">
+                    {signer.key}
+                  </p>
                   <p className="text-[10px] text-slate-500 mt-0.5">
                     Weight: {signer.weight} · Type: {signer.type}
                   </p>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-slate-500">No signers data available.</p>
+              <p className="text-xs text-slate-500">
+                No signers data available.
+              </p>
             )}
           </div>
         )}
@@ -207,14 +234,22 @@ export function StellarAccountDetail({ account, onSync }: StellarAccountDetailPr
                 Trustlines
               </span>
             </div>
-            {networkInfo?.balances?.filter((b) => b.asset_type !== 'native').length ? (
+            {networkInfo?.balances?.filter((b) => b.asset_type !== 'native')
+              .length ? (
               networkInfo.balances
                 .filter((b) => b.asset_type !== 'native')
                 .map((b) => (
-                  <div key={`${b.asset_code}-${b.asset_issuer}`} className="px-3 py-2.5 rounded-lg bg-white/5">
+                  <div
+                    key={`${b.asset_code}-${b.asset_issuer}`}
+                    className="px-3 py-2.5 rounded-lg bg-white/5"
+                  >
                     <div className="flex justify-between">
-                      <span className="text-xs font-semibold text-slate-300">{b.asset_code}</span>
-                      <span className="text-xs text-slate-400">{parseFloat(b.balance).toFixed(2)}</span>
+                      <span className="text-xs font-semibold text-slate-300">
+                        {b.asset_code}
+                      </span>
+                      <span className="text-xs text-slate-400">
+                        {parseFloat(b.balance).toFixed(2)}
+                      </span>
                     </div>
                     <p className="font-mono text-[10px] text-slate-500 truncate mt-0.5">
                       {b.asset_issuer}

@@ -23,7 +23,9 @@ const SEVERITY_STYLES: Record<
     bg: 'bg-amber-50',
     border: 'border-amber-200',
     text: 'text-amber-800',
-    icon: <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />,
+    icon: (
+      <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+    ),
   },
   error: {
     bg: 'bg-red-50',

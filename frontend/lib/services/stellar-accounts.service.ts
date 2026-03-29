@@ -32,34 +32,53 @@ export interface NetworkTrustline {
 export interface NetworkAccountInfo {
   publicKey: string;
   sequenceNumber: string;
-  balances: { asset_type: string; asset_code?: string; balance: string; asset_issuer?: string }[];
+  balances: {
+    asset_type: string;
+    asset_code?: string;
+    balance: string;
+    asset_issuer?: string;
+  }[];
   subentryCount: number;
-  thresholds: { low_threshold: number; med_threshold: number; high_threshold: number };
+  thresholds: {
+    low_threshold: number;
+    med_threshold: number;
+    high_threshold: number;
+  };
   signers: { key: string; weight: number; type: string }[];
   flags: Record<string, boolean>;
   data?: Record<string, string>;
 }
 
-export async function fetchUserStellarAccounts(userId: string): Promise<ManagedStellarAccount[]> {
+export async function fetchUserStellarAccounts(
+  userId: string,
+): Promise<ManagedStellarAccount[]> {
   const { data } = await apiClient.get<ManagedStellarAccount[]>(
     `/stellar/accounts/user/${userId}`,
   );
   return data ?? [];
 }
 
-export async function fetchStellarAccountById(id: number): Promise<ManagedStellarAccount> {
-  const { data } = await apiClient.get<ManagedStellarAccount>(`/stellar/accounts/${id}`);
+export async function fetchStellarAccountById(
+  id: number,
+): Promise<ManagedStellarAccount> {
+  const { data } = await apiClient.get<ManagedStellarAccount>(
+    `/stellar/accounts/${id}`,
+  );
   return data;
 }
 
-export async function fetchNetworkAccountInfo(publicKey: string): Promise<NetworkAccountInfo> {
+export async function fetchNetworkAccountInfo(
+  publicKey: string,
+): Promise<NetworkAccountInfo> {
   const { data } = await apiClient.get<NetworkAccountInfo>(
     `/stellar/accounts/${publicKey}/network`,
   );
   return data;
 }
 
-export async function syncStellarAccount(publicKey: string): Promise<ManagedStellarAccount> {
+export async function syncStellarAccount(
+  publicKey: string,
+): Promise<ManagedStellarAccount> {
   const { data } = await apiClient.post<ManagedStellarAccount>(
     `/stellar/accounts/${publicKey}/sync`,
     {},
@@ -76,7 +95,9 @@ export function exportAccountData(account: ManagedStellarAccount): void {
     createdAt: account.createdAt,
     updatedAt: account.updatedAt,
   };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: 'application/json',
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

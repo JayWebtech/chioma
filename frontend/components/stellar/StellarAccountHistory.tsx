@@ -21,7 +21,9 @@ interface StellarAccountHistoryProps {
   publicKey: string;
 }
 
-export function StellarAccountHistory({ publicKey }: StellarAccountHistoryProps) {
+export function StellarAccountHistory({
+  publicKey,
+}: StellarAccountHistoryProps) {
   const { data, isLoading } = useQuery({
     queryKey: ['stellar-history', publicKey],
     queryFn: async () => {
@@ -48,7 +50,9 @@ export function StellarAccountHistory({ publicKey }: StellarAccountHistoryProps)
 
   if (transactions.length === 0) {
     return (
-      <p className="text-xs text-slate-500 py-4 text-center">No transactions found.</p>
+      <p className="text-xs text-slate-500 py-4 text-center">
+        No transactions found.
+      </p>
     );
   }
 
