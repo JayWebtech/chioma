@@ -1,152 +1,102 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Menu, Search, Bell, User } from 'lucide-react';
-import { DeveloperSidebar } from '@/components/developer/DeveloperSidebar';
-import { DeveloperNav } from '@/components/developer/DeveloperNav';
-import { developerNavItems } from '@/data/developer-nav-items';
+import type { ReactNode } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Code2, KeyRound, Webhook } from 'lucide-react';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/store/authStore';
-import { ClientErrorBoundary } from '@/components/error/ClientErrorBoundary';
+import { isDeveloperPortalUser } from '@/lib/developer-webhooks';
 
-export default function DeveloperPortalLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user, isAuthenticated, loading } = useAuth();
-  const router = useRouter();
+const developerNavItems = [
+  { href: '/developer', label: 'Overview', icon: Code2 },
+  { href: '/developer/webhooks', label: 'Webhooks', icon: Webhook },
+];
 
-  // Server middleware protects /developer/* but add a client-side role guard too
-  if (!loading && (!isAuthenticated || !user)) {
-    router.replace('/login?callbackUrl=/developer');
-    return null;
-  }
-
-  if (!loading && user && user.role !== 'admin' && user.role !== 'agent') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex items-center justify-center p-6">
-        <div className="max-w-md w-full rounded-2xl border border-amber-400/20 bg-amber-500/10 backdrop-blur-xl p-8 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 flex items-center justify-center mx-auto">
-            <User size={28} className="text-amber-400" />
-          </div>
-          <h2 className="text-xl font-bold text-white">Access Restricted</h2>
-          <p className="text-amber-200/80 text-sm leading-relaxed">
-            The Developer Portal is only accessible to admins and agents. If you
-            believe this is a mistake, please contact your administrator.
-          </p>
-          <button
-            onClick={() => router.replace('/dashboard')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all"
-          >
-            Go to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
+export default function DeveloperLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const { user, loading } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-white flex flex-col lg:flex-row font-sans">
-      {/* Sidebar */}
-      <DeveloperSidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        navItems={developerNavItems}
-      />
-
-      {/* Main */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-w-0 min-h-screen">
-        {/* Top Header */}
-        <header className="sticky top-0 z-30 backdrop-blur-xl bg-slate-950/80 border-b border-white/10">
-          <div className="h-20 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-            {/* Left — mobile toggle + title */}
-            <div className="flex items-center gap-4">
-              <button
-                id="dev-sidebar-toggle"
-                onClick={() => setIsSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-blue-200 hover:bg-white/10 rounded-xl transition-colors"
-                aria-label="Open developer sidebar"
-              >
-                <Menu size={24} />
-              </button>
-              <div className="hidden sm:flex flex-col">
-                <h1 className="text-xl font-bold tracking-tight text-white leading-none">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <header className="rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-slate-950/30">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-100">
+                  <Webhook className="h-3.5 w-3.5" />
                   Developer Portal
+                </div>
+                <h1 className="mt-4 text-3xl font-bold tracking-tight">
+                  Manage outbound integrations
                 </h1>
-                <span className="text-xs text-indigo-400/80 font-medium mt-0.5">
-                  Chioma API Platform
-                </span>
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">
+                  Configure webhooks, inspect delivery activity, and validate payloads
+                  for external systems connected to Chioma.
+                </p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Link
+                  href="/developer/webhooks"
+                  className="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  Open webhooks
+                </Link>
+                <a
+                  href="/api/docs"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  <KeyRound className="h-4 w-4" />
+                  API documentation
+                </a>
               </div>
             </div>
 
-            {/* Right — search + notifications + avatar */}
-            <div className="flex items-center gap-3 sm:gap-4">
-              {/* Search bar (desktop) */}
-              <div className="hidden md:flex relative w-60">
-                <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-300/50"
-                  size={16}
-                />
-                <input
-                  id="dev-search"
-                  type="text"
-                  placeholder="Search docs, endpoints…"
-                  className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-white placeholder:text-blue-300/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                />
-              </div>
-              {/* Search icon (mobile) */}
-              <button
-                id="dev-search-mobile"
-                className="md:hidden p-2 text-blue-200 hover:bg-white/10 rounded-full transition-colors"
-                aria-label="Search"
-              >
-                <Search size={20} />
-              </button>
+            <nav className="mt-6 flex flex-wrap gap-3" aria-label="Developer portal">
+              {developerNavItems.map((item) => {
+                const active =
+                  item.href === '/developer'
+                    ? pathname === item.href
+                    : pathname.startsWith(item.href);
 
-              {/* Notifications */}
-              <button
-                id="dev-notifications"
-                className="relative p-2 text-blue-200 hover:bg-white/10 rounded-full transition-colors"
-                aria-label="Notifications"
-              >
-                <Bell size={20} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-400 border-2 border-slate-950" />
-              </button>
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-medium transition ${
+                      active
+                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-950/30'
+                        : 'border border-white/10 bg-slate-950/35 text-slate-200 hover:bg-white/10'
+                    }`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </header>
 
-              {/* Avatar */}
-              <button
-                id="dev-user-avatar"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 hover:bg-indigo-500/30 transition-all"
-                aria-label="User profile"
-              >
-                {user ? (
-                  <span className="text-sm font-bold">
-                    {user.firstName.charAt(0).toUpperCase()}
-                  </span>
-                ) : (
-                  <User size={18} />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Breadcrumb + mobile tab nav */}
-          <DeveloperNav />
-        </header>
-
-        {/* Page Content */}
-        <ClientErrorBoundary
-          source="app/developer/layout.tsx-main"
-          fallbackTitle="Developer Portal error"
-          fallbackDescription="Something went wrong loading this developer view. Please retry."
-        >
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto overflow-x-hidden">
-            {children}
+          <main className="py-6">
+            {loading ? (
+              <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-slate-200">
+                Loading developer portal...
+              </section>
+            ) : !isDeveloperPortalUser(user) ? (
+              <section className="rounded-3xl border border-amber-300/20 bg-amber-500/10 p-6 text-amber-50">
+                <h2 className="text-2xl font-semibold">Developer access required</h2>
+                <p className="mt-3 text-sm text-amber-100/80">
+                  This portal is restricted to admin and developer integration accounts.
+                </p>
+              </section>
+            ) : (
+              children
+            )}
           </main>
-        </ClientErrorBoundary>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
