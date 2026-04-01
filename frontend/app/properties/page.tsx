@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
 import PropertyCardSkeleton from '@/components/PropertyCardSkeleton';
 import PropertyCard from '@/components/properties/PropertyCard';
-import { Filter, Bell, List, Map } from 'lucide-react';
+import { Filter, Bell, List, Map, ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { LOADING_KEYS, useLoading } from '@/store';
 import { Spinner, LoadingButton } from '@/components/loading';
@@ -30,6 +30,9 @@ export default function PropertyListing() {
   const { isLoading, setLoading } = useLoading(LOADING_KEYS.pageProperties);
   const [loadMoreLoading, setLoadMoreLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('split');
+  const [mapWidth, setMapWidth] = useState<number>(50); // percentage in split view
+  const [isMapCollapsed, setIsMapCollapsed] = useState(false);
+
 
   useEffect(() => {
     setLoading(true);
@@ -153,109 +156,134 @@ export default function PropertyListing() {
 
   const filteredProperties = properties;
 
+  const toggleMapCollapse = () => {
+    setIsMapCollapsed(!isMapCollapsed);
+  };
+
+  const adjustMapWidth = (delta: number) => {
+    setMapWidth((prev) => Math.min(Math.max(prev + delta, 20), 80));
+  };
+
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
         <Navbar theme="dark" />
         {/* Header/Search Bar */}
-        <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-900/80 border-b border-white/10 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-            <div className="flex flex-col gap-4 md:gap-0">
-              {/* Filter Buttons and Actions */}
-              <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                <button className="px-4 py-2 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-all font-medium text-blue-200/80 hover:text-white backdrop-blur-sm">
+        <header className="sticky top-0 z-40 glass-dark border-b border-white/10 shadow-lg">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              {/* Filter Buttons */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button className="px-4 py-2 text-sm glass-card rounded-xl text-blue-100/80 hover:text-white font-medium">
                   Price Range
                 </button>
-                <button className="px-4 py-2 text-sm bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all font-medium shadow-lg">
+                <button className="px-4 py-2 text-sm bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold shadow-blue-500/20 shadow-lg">
                   Property Type
                 </button>
-                <button className="px-4 py-2 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-all font-medium text-blue-200/80 hover:text-white backdrop-blur-sm">
+                <button className="px-4 py-2 text-sm glass-card rounded-xl text-blue-100/80 hover:text-white font-medium">
                   Beds & Baths
                 </button>
-                <button className="px-4 py-2 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-all font-medium text-blue-200/80 hover:text-white backdrop-blur-sm hidden sm:inline-block">
+                <button className="px-4 py-2 text-sm glass-card rounded-xl text-blue-100/80 hover:text-white font-medium hidden lg:inline-block">
                   Amenities
                 </button>
-                <div className="flex items-center gap-2 ml-auto shrink-0">
-                  {/* View Toggle */}
-                  <div className="flex items-center gap-0 border border-white/20 rounded-lg overflow-hidden backdrop-blur-sm bg-slate-800/50 shadow-lg">
-                    <button
-                      onClick={() => setViewMode('list')}
-                      className={`min-h-[44px] min-w-[44px] flex items-center justify-center px-3 py-2 text-sm transition-all ${
-                        viewMode === 'list'
-                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
-                          : 'bg-transparent text-blue-200/80 hover:bg-white/10 hover:text-white'
-                      }`}
-                      title="List View"
-                    >
-                      <List className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setViewMode('split')}
-                      className={`min-h-[44px] min-w-[44px] flex items-center justify-center px-3 py-2 text-sm transition-all ${
-                        viewMode === 'split'
-                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
-                          : 'bg-transparent text-blue-200/80 hover:bg-white/10 hover:text-white'
-                      }`}
-                      title="Split View"
-                    >
-                      <div className="flex gap-0.5">
-                        <div className="w-1.5 h-3 bg-current rounded-l" />
-                        <div className="w-1.5 h-3 bg-current rounded-r" />
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setViewMode('map')}
-                      className={`min-h-[44px] min-w-[44px] flex items-center justify-center px-3 py-2 text-sm transition-all ${
-                        viewMode === 'map'
-                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
-                          : 'bg-transparent text-blue-200/80 hover:bg-white/10 hover:text-white'
-                      }`}
-                      title="Map View"
-                    >
-                      <Map className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <button className="flex items-center gap-1 px-4 py-2 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-all font-medium text-blue-200/80 hover:text-white shadow-lg backdrop-blur-sm">
-                    <Filter className="w-4 h-4" />
-                    <span className="hidden sm:inline">Filters</span>
+              </div>
+
+              {/* View & Actions */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center p-1 glass-dark rounded-xl border border-white/5 shadow-inner">
+                  <button
+                    onClick={() => {
+                      setViewMode('list');
+                      setIsMapCollapsed(true);
+                    }}
+                    className={`p-2 rounded-lg transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'text-blue-200/60 hover:text-white hover:bg-white/5'
+                    }`}
+                    title="List View"
+                  >
+                    <List className="w-4 h-4" />
                   </button>
-                  <button className="flex items-center gap-1 px-4 py-2 text-sm bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded-lg hover:bg-blue-500/30 transition-all font-medium shadow-lg backdrop-blur-sm">
-                    <Bell className="w-4 h-4" />
-                    <span className="hidden sm:inline">Save Search</span>
+                  <button
+                    onClick={() => {
+                      setViewMode('split');
+                      setIsMapCollapsed(false);
+                      setMapWidth(50);
+                    }}
+                    className={`p-2 rounded-lg transition-all ${
+                      viewMode === 'split' && !isMapCollapsed
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'text-blue-200/60 hover:text-white hover:bg-white/5'
+                    }`}
+                    title="Split View"
+                  >
+                    <div className="flex gap-0.5">
+                      <div className="w-1.5 h-3 bg-current rounded-sm" />
+                      <div className="w-1.5 h-3 bg-current rounded-sm" />
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setViewMode('map');
+                      setIsMapCollapsed(false);
+                      setMapWidth(100);
+                    }}
+                    className={`p-2 rounded-lg transition-all ${
+                      viewMode === 'map'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'text-blue-200/60 hover:text-white hover:bg-white/5'
+                    }`}
+                    title="Map View"
+                  >
+                    <Map className="w-4 h-4" />
                   </button>
                 </div>
+
+                <div className="h-6 w-px bg-white/10 mx-1" />
+
+                <button className="flex items-center gap-2 px-4 py-2 text-sm glass-card rounded-xl text-blue-100/80 hover:text-white font-medium">
+                  <Filter className="w-4 h-4" />
+                  <span className="hidden sm:inline">Filters</span>
+                </button>
+                <button className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500/10 text-blue-400 border border-blue-400/20 rounded-xl hover:bg-blue-500/20 transition-all font-semibold">
+                  <Bell className="w-4 h-4" />
+                  <span className="hidden sm:inline">Save</span>
+                </button>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Main Content */}
-        <div
-          className={`flex gap-0 ${
-            viewMode === 'split' ? 'flex-col lg:flex-row' : 'flex-col'
-          }`}
-        >
-          {/* Listings Panel */}
-          {(viewMode === 'list' || viewMode === 'split') && (
-            <div
-              className={`overflow-y-auto max-h-[calc(100vh-100px)] bg-slate-800/30 backdrop-blur-sm ${
-                viewMode === 'split' ? 'w-full lg:w-2/5 xl:w-1/2' : 'w-full'
-              }`}
-            >
-              <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Heading */}
-                <div className="mb-6">
-                  <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-2">
-                    {filteredProperties.length} Global Stays
-                  </h1>
-                  <p className="text-blue-200/70 text-sm sm:text-base">
-                    Check verified listings with smart lease support
-                  </p>
-                </div>
 
-                {/* Verified Badge */}
-                <div className="backdrop-blur-xl bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4 sm:p-6 mb-8 flex gap-3 sm:gap-4 shadow-lg">
-                  <div className="shrink-0">
+        {/* Main Content */}
+        <div className="flex h-[calc(100vh-80px)] overflow-hidden">
+          {/* Listings Panel */}
+          <div
+            className="overflow-y-auto transition-all duration-500 ease-in-out bg-slate-900/50"
+            style={{
+              width: isMapCollapsed ? '100%' : `${100 - mapWidth}%`,
+              display: viewMode === 'map' && !isMapCollapsed ? 'none' : 'block',
+            }}
+          >
+            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {/* Heading */}
+              <div className="mb-8">
+                <h1 className="text-3xl sm:text-5xl font-black text-gradient mb-3 tracking-tighter">
+                  {filteredProperties.length} Premium Stays
+                </h1>
+                <p className="text-blue-200/50 text-base sm:text-lg max-w-xl leading-relaxed">
+                  Discover luxury blockchain-verified properties with seamless
+                  smart contract leasing.
+                </p>
+              </div>
+
+              {/* Verified Badge */}
+              <div className="glass-card rounded-2xl p-6 mb-10 flex gap-5 shadow-2xl relative overflow-hidden group">
+                <div className="absolute inset-0 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors" />
+                <div className="shrink-0 relative">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-400/30">
                     <svg
                       className="w-6 h-6 text-emerald-400"
                       fill="currentColor"
@@ -268,89 +296,142 @@ export default function PropertyListing() {
                       />
                     </svg>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-emerald-300 mb-1 text-sm sm:text-base">
-                      Verified Blockchain Listings
-                    </h3>
-                    <p className="text-emerald-200/70 text-xs sm:text-sm">
-                      All properties with the verified badge have been vetted
-                      and are ready for instant smart contract leasing.
-                    </p>
-                  </div>
                 </div>
-
-                {/* Sort */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <span className="text-blue-200/70 text-sm sm:text-base font-medium">
-                      Sort by:
-                    </span>
-                    <select className="px-3 py-2 border border-white/20 rounded-lg text-sm sm:text-base bg-slate-800/50 text-white cursor-pointer hover:border-white/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-lg backdrop-blur-sm">
-                      <option>Recommended</option>
-                      <option>Price: Low to High</option>
-                      <option>Price: High to Low</option>
-                      <option>Newest</option>
-                    </select>
-                  </div>
+                <div className="relative">
+                  <h3 className="font-bold text-emerald-100 mb-1 text-lg">
+                    Blockchain Verified
+                  </h3>
+                  <p className="text-emerald-200/50 text-sm max-w-md">
+                    Securely vetted listings ready for instant deployment using
+                    on-chain smart contracts.
+                  </p>
                 </div>
+              </div>
 
-                {/* Property Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-4 mb-8">
-                  {isLoading ? (
-                    <>
-                      {Array.from({ length: 6 }).map((_, index) => (
-                        <PropertyCardSkeleton key={index} />
-                      ))}
-                    </>
-                  ) : filteredProperties.length > 0 ? (
-                    filteredProperties.map((property) => (
-                      <PropertyCard key={property.id} property={property} />
-                    ))
-                  ) : (
-                    <div className="col-span-1 sm:col-span-2 text-center py-12 text-blue-200/70">
-                      No properties found matching your search.
+              {/* Sort and Filters */}
+              <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+                <div className="flex items-center gap-4">
+                  <span className="text-blue-200/40 text-sm font-semibold uppercase tracking-widest">
+                    Sorted by
+                  </span>
+                  <select className="bg-transparent text-white font-bold text-sm cursor-pointer focus:outline-none hover:text-blue-400 transition-colors">
+                    <option className="bg-slate-900">Recommended</option>
+                    <option className="bg-slate-900">Price: Low to High</option>
+                    <option className="bg-slate-900">Price: High to Low</option>
+                    <option className="bg-slate-900">Newest First</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Property Cards Grid */}
+              <div
+                className={`grid gap-6 mb-12 ${
+                  isMapCollapsed || mapWidth < 40
+                    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                    : 'grid-cols-1 md:grid-cols-2'
+                }`}
+              >
+                {isLoading ? (
+                  <>
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <PropertyCardSkeleton key={index} />
+                    ))}
+                  </>
+                ) : filteredProperties.length > 0 ? (
+                  filteredProperties.map((property) => (
+                    <PropertyCard key={property.id} property={property} />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-24 glass-card rounded-3xl border-dashed">
+                    <div className="text-blue-200/30 text-lg font-medium">
+                      No properties match your current filters
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
 
-                {/* Load More Button */}
-                <div className="flex justify-center">
-                  <LoadingButton
-                    loading={loadMoreLoading}
-                    onClick={() => {
-                      setLoadMoreLoading(true);
-                      setTimeout(() => setLoadMoreLoading(false), 1200);
-                    }}
-                    className="rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:from-blue-600 hover:to-indigo-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70 sm:text-base"
-                  >
-                    Load More Listings
-                  </LoadingButton>
-                </div>
+              {/* Load More Button */}
+              <div className="flex justify-center">
+                <LoadingButton
+                  loading={loadMoreLoading}
+                  onClick={() => {
+                    setLoadMoreLoading(true);
+                    setTimeout(() => setLoadMoreLoading(false), 1200);
+                  }}
+                  className="rounded-xl bg-blue-600 px-10 py-4 text-sm font-bold text-white shadow-xl shadow-blue-500/20 transition-all hover:bg-blue-700 hover:scale-105 active:scale-95 disabled:opacity-50"
+                >
+                  Load More Stays
+                </LoadingButton>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Map Panel */}
-          {(viewMode === 'map' || viewMode === 'split') && (
-            <div
-              className={`h-96 lg:h-[calc(100vh-100px)] relative ${
-                viewMode === 'split'
-                  ? 'w-full lg:w-3/5 xl:w-1/2 lg:sticky lg:top-24'
-                  : 'w-full'
+          <div
+            className="relative transition-all duration-500 ease-in-out border-l border-white/5 bg-[#0f172a]"
+            style={{
+              width: isMapCollapsed ? '0%' : `${mapWidth}%`,
+              opacity: isMapCollapsed ? 0 : 1,
+              pointerEvents: isMapCollapsed ? 'none' : 'auto',
+            }}
+          >
+            {/* Map Controls */}
+            {!isMapCollapsed && (
+              <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
+                <div className="glass-dark rounded-xl p-1 shadow-2xl border border-white/10 flex items-center gap-1">
+                  <button
+                    onClick={() => adjustMapWidth(-10)}
+                    className="p-2 text-blue-200/60 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                    title="Expand Listings"
+                  >
+                    <List className="w-4 h-4 rotate-180" />
+                  </button>
+                  <div className="h-6 w-px bg-white/10" />
+                  <button
+                    onClick={() => adjustMapWidth(10)}
+                    className="p-2 text-blue-200/60 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                    title="Expand Map"
+                  >
+                    <Map className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Collapse Toggle */}
+            <button
+              onClick={toggleMapCollapse}
+              className={`absolute top-1/2 -left-4 z-20 flex h-12 w-8 -translate-y-1/2 items-center justify-center glass-dark border border-white/10 rounded-l-xl transition-all hover:scale-105 active:scale-95 shadow-2xl ${
+                isMapCollapsed ? 'left-0 rounded-r-xl rounded-l-none' : ''
               }`}
             >
-              {/* Search as I Move Checkbox Overlay */}
-              <div className="absolute top-4 right-4 backdrop-blur-xl bg-slate-800/90 rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 shadow-lg z-10 border border-white/10">
-                <input
-                  type="checkbox"
-                  checked={searchAsIMove}
-                  onChange={(e) => setSearchAsIMove(e.target.checked)}
-                  className="w-4 h-4 rounded cursor-pointer accent-blue-600"
-                />
-                <label className="text-blue-200/90 text-xs sm:text-sm font-medium cursor-pointer select-none">
-                  Search as I move the map
-                </label>
+              <div
+                className={`transition-transform duration-500 ${
+                  isMapCollapsed ? 'rotate-180' : ''
+                }`}
+              >
+                <ChevronLeft className="w-4 h-4 text-white" />
               </div>
+            </button>
+
+            {/* Search as I Move Checkbox Overlay */}
+            <div className="absolute top-6 right-6 backdrop-blur-2xl bg-slate-900/40 rounded-2xl px-5 py-3 flex items-center gap-3 shadow-2xl z-10 border border-white/10 group cursor-pointer hover:bg-slate-900/60 transition-all">
+              <input
+                type="checkbox"
+                id="searchMove"
+                checked={searchAsIMove}
+                onChange={(e) => setSearchAsIMove(e.target.checked)}
+                className="w-5 h-5 rounded-lg cursor-pointer accent-blue-600 border-white/20 bg-slate-800"
+              />
+              <label
+                htmlFor="searchMove"
+                className="text-white text-sm font-bold cursor-pointer select-none tracking-tight group-hover:text-blue-200 transition-colors"
+              >
+                Search as I move
+              </label>
+            </div>
+
+            <div className="h-full w-full">
               <PropertyMapView
                 properties={filteredProperties}
                 onBoundsChange={handleBoundsChange}
@@ -362,8 +443,9 @@ export default function PropertyListing() {
                 }}
               />
             </div>
-          )}
+          </div>
         </div>
+
         <Footer />
       </div>
     </>

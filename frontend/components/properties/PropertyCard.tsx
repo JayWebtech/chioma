@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, MapPin, Bed, Bath, Ruler } from 'lucide-react';
+import { Heart, MapPin, Bed, Bath, Ruler, ChevronLeft } from 'lucide-react';
 
 interface PropertyCardProps {
   property: {
@@ -27,13 +27,17 @@ export default function PropertyCard({
   const isList = variant === 'list';
 
   return (
-    <Link href={`/properties/${property.id}`} className="block">
+    <Link href={`/properties/${property.id}`} className="block group">
       <div
-        className={`backdrop-blur-xl bg-slate-800/50 border border-white/10 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-white/20 transition-all duration-300 group cursor-pointer ${isList ? 'flex flex-col sm:flex-row' : 'flex flex-col'}`}
+        className={`glass-card rounded-3xl overflow-hidden shadow-2xl transition-all duration-500 hover:shadow-blue-500/10 ${
+          isList ? 'flex flex-col sm:flex-row h-full' : 'flex flex-col h-full'
+        }`}
       >
         {/* Image Container */}
         <div
-          className={`relative bg-slate-200 overflow-hidden cursor-pointer ${isList ? 'w-full sm:w-72 h-48 sm:h-auto shrink-0' : 'aspect-4/3 sm:aspect-video'}`}
+          className={`relative overflow-hidden cursor-pointer ${
+            isList ? 'w-full sm:w-80 h-64 sm:h-auto shrink-0' : 'aspect-[4/3]'
+          }`}
         >
           <Image
             src={property.image || '/placeholder.svg'}
@@ -41,103 +45,117 @@ export default function PropertyCard({
             fill
             sizes={
               isList
-                ? '(max-width: 640px) 100vw, 300px'
+                ? '(max-width: 640px) 100vw, 320px'
                 : '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
             }
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
           />
 
           {/* Status Badge */}
-          {property.verified ? (
-            <div className="absolute top-4 left-4 bg-emerald-600/90 backdrop-blur-md text-white px-3 py-1 rounded-full flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Verified
-            </div>
-          ) : (
-            <div className="absolute top-4 left-4 bg-gradient-to-r from-blue-500 to-indigo-600 backdrop-blur-md text-white px-3 py-1 rounded-full flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
-              Just Listed
-            </div>
-          )}
+          <div className="absolute top-4 left-4 z-10">
+            {property.verified ? (
+              <div className="bg-emerald-500/20 backdrop-blur-xl text-emerald-400 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-widest border border-emerald-400/30 shadow-2xl">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Verified
+              </div>
+            ) : (
+              <div className="bg-blue-600 backdrop-blur-xl text-white px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-widest border border-blue-400/30 shadow-2xl">
+                New Listing
+              </div>
+            )}
+          </div>
 
           {/* Wishlist Heart */}
-          <button className="absolute top-4 right-4 bg-slate-800/90 backdrop-blur-md rounded-full p-2.5 hover:bg-slate-700 hover:text-red-400 text-blue-200/70 transition-all shadow-lg active:scale-95 border border-white/10">
-            <Heart className="w-5 h-5" />
+          <button className="absolute top-4 right-4 z-10 bg-slate-900/40 backdrop-blur-xl rounded-2xl p-3 hover:bg-white hover:text-red-500 text-white transition-all shadow-2xl active:scale-90 border border-white/10 group/heart">
+            <Heart className="w-5 h-5 transition-transform group-hover/heart:scale-110" />
           </button>
 
-          {/* Lease Badge */}
-          <div className="absolute bottom-4 left-4 bg-blue-500/20 backdrop-blur-md text-blue-200 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium border border-blue-400/30 shadow-lg">
-            Smart Lease Ready
-          </div>
+          {/* Price Overlay (on grid mode) */}
+          {!isList && (
+            <div className="absolute bottom-4 left-4 right-4 z-10">
+              <div className="glass-dark rounded-2xl p-4 border border-white/5 shadow-2xl">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <p className="text-white font-black text-2xl tracking-tighter">
+                      {property.price}
+                      <span className="text-blue-200/50 text-sm font-medium tracking-normal ml-1">
+                        /mo
+                      </span>
+                    </p>
+                    <p className="text-blue-200/60 text-xs font-bold uppercase tracking-widest mt-1">
+                      Smart Lease Ready
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Content Container */}
-        <div className={`p-5 flex-1 flex flex-col justify-between`}>
-          <div>
-            {/* Price & Title */}
-            <div
-              className={`${isList ? 'flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2' : ''}`}
-            >
-              <p className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-bold text-xl sm:text-2xl tracking-tight">
-                {property.price}
-                <span className="text-slate-500 font-medium text-sm sm:text-base tracking-normal ml-1">
-                  /mo
-                </span>
-              </p>
-
-              {isList && (
-                <h3 className="font-bold text-white text-base sm:text-lg leading-snug cursor-pointer hover:text-blue-400 transition-colors line-clamp-1">
-                  {property.title}
-                </h3>
-              )}
-            </div>
-
-            {!isList && (
-              <h3 className="font-bold text-white mb-2.5 text-base sm:text-lg leading-snug cursor-pointer hover:text-blue-400 transition-colors line-clamp-1">
-                {property.title}
-              </h3>
+        <div className="p-6 flex-1 flex flex-col">
+          <div className="flex-1">
+            {isList && (
+              <div className="flex justify-between items-start mb-4">
+                <p className="text-white font-black text-3xl tracking-tighter">
+                  {property.price}
+                  <span className="text-blue-200/50 text-sm font-medium tracking-normal ml-1">
+                    /mo
+                  </span>
+                </p>
+                <div className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-lg text-xs font-bold border border-blue-400/20">
+                  Smart Lease
+                </div>
+              </div>
             )}
 
+            <h3 className="font-black text-white mb-2 text-xl sm:text-2xl leading-tight tracking-tight group-hover:text-blue-400 transition-colors line-clamp-1">
+              {property.title}
+            </h3>
+
             {/* Location */}
-            <div className="flex items-start gap-1.5 text-blue-200/70 mb-5 text-sm">
-              <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 text-blue-200/40 mb-6 text-sm font-medium">
+              <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-blue-500" />
               <p className="line-clamp-1">{property.location}</p>
             </div>
 
             {/* Features Grid */}
-            <div
-              className={`flex gap-4 sm:gap-6 mb-5 pb-5 border-b border-white/10 text-blue-200/80 font-medium text-sm ${isList ? 'flex-wrap' : ''}`}
-            >
-              <div className="flex items-center gap-1.5">
-                <Bed className="w-4 h-4 text-blue-400" />
+            <div className="grid grid-cols-3 gap-4 mb-8 pb-6 border-b border-white/5 text-blue-100 font-bold text-xs uppercase tracking-widest">
+              <div className="flex flex-col gap-2 items-center sm:items-start">
+                <Bed className="w-5 h-5 text-blue-500" />
                 <span>{property.beds} Beds</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Bath className="w-4 h-4 text-blue-400" />
+              <div className="flex flex-col gap-2 items-center sm:items-start">
+                <Bath className="w-5 h-5 text-blue-500" />
                 <span>{property.baths} Baths</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Ruler className="w-4 h-4 text-blue-400" />
+              <div className="flex flex-col gap-2 items-center sm:items-start">
+                <Ruler className="w-5 h-5 text-blue-500" />
                 <span>{property.sqft} sqft</span>
               </div>
             </div>
           </div>
 
           {/* Manager / Footer */}
-          <div className="flex items-center gap-3 mt-auto">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 shrink-0 shadow-sm" />
-            <p className="text-sm text-blue-200/70 truncate">
-              Managed by{' '}
-              <span className="font-bold text-white">{property.manager}</span>
-            </p>
+          <div className="flex items-center justify-between group/manager cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shrink-0 shadow-lg border border-white/10 group-hover/manager:scale-110 transition-transform" />
+              <div>
+                <p className="text-[10px] text-blue-200/30 font-black uppercase tracking-[0.2em]">
+                  Managed by
+                </p>
+                <p className="text-sm font-bold text-white leading-none mt-0.5">
+                  {property.manager}
+                </p>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover/manager:bg-blue-600 transition-colors">
+              <ChevronLeft className="w-4 h-4 text-white rotate-180" />
+            </div>
           </div>
         </div>
       </div>
     </Link>
+
   );
 }
