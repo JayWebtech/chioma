@@ -78,7 +78,10 @@
   },
   "overrides": {
     "minimatch": "^9.0.8",
-    "next": "16.1.5"
+    "next": "16.2.3",
+    "vite": "^6.4.2",
+    "protobufjs": "^7.5.5",
+    "defu": "^6.1.5"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
