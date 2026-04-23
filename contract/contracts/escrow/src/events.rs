@@ -93,7 +93,12 @@ pub(crate) fn escrow_frozen(
     .publish(env);
 }
 
-pub(crate) fn escrow_unfrozen(env: &Env, escrow_id: BytesN<32>, unfrozen_by: Address, timestamp: u64) {
+pub(crate) fn escrow_unfrozen(
+    env: &Env,
+    escrow_id: BytesN<32>,
+    unfrozen_by: Address,
+    timestamp: u64,
+) {
     EscrowUnfrozen {
         escrow_id,
         unfrozen_by,
