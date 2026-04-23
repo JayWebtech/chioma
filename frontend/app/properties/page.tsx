@@ -9,8 +9,8 @@ import PropertyCardSkeleton from '@/components/PropertyCardSkeleton';
 import PropertyCard from '@/components/properties/PropertyCard';
 import { PropertyListingHeader } from '@/components/properties/PropertyListingHeader';
 import { Filter, Bell, List, Map, ChevronLeft } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { LOADING_KEYS, useLoading } from '@/store';
 import { Spinner } from '@/components/loading';
 import { MOCK_PROPERTIES } from '@/mocks/entities/properties';
@@ -32,6 +32,7 @@ type ViewMode = 'split' | 'list' | 'map';
 
 export default function PropertyListing() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [searchAsIMove, setSearchAsIMove] = useState(true);
   const { isLoading, setLoading } = useLoading(LOADING_KEYS.pageProperties);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -45,6 +46,21 @@ export default function PropertyListing() {
     () => searchParams.get('q') ?? '',
   );
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') ?? '');
+  }, [searchParams]);
+
+  const applySearchToUrl = useCallback(
+    (raw: string) => {
+      const trimmed = raw.trim();
+      const next = trimmed
+        ? `/properties?q=${encodeURIComponent(trimmed)}`
+        : '/properties';
+      router.replace(next);
+    },
+    [router],
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -111,11 +127,13 @@ export default function PropertyListing() {
     });
   };
 
-  const filteredProperties = searchQuery.trim()
+  const qLower = searchQuery.trim().toLowerCase();
+  const filteredProperties = qLower
     ? properties.filter(
         (p) =>
-          p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.location?.toLowerCase().includes(searchQuery.toLowerCase()),
+          p.title?.toLowerCase().includes(qLower) ||
+          p.location?.toLowerCase().includes(qLower) ||
+          p.category?.toLowerCase().includes(qLower),
       )
     : properties;
 
@@ -144,11 +162,18 @@ export default function PropertyListing() {
               {/* Filter Buttons & Advanced Filters Merge */}
               <div className="flex flex-wrap items-center gap-2 relative">
                 <input
-                  type="text"
+                  type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by location..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      applySearchToUrl(searchQuery);
+                    }
+                  }}
+                  placeholder="Search by location or property type..."
                   className="px-4 py-2 text-sm bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder:text-blue-200/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                  aria-label="Search properties"
                 />
 
                 {/* Dropdown Filters Mimicking original styling */}

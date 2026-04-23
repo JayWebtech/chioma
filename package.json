@@ -1,7 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "seed": "pnpm --dir backend run seed"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.1",

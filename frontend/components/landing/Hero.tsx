@@ -18,9 +18,12 @@ export default function Hero() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams();
-    if (query.trim()) params.set('q', query.trim());
-    router.push(`/properties?${params.toString()}`);
+    const trimmed = query.trim();
+    if (trimmed) {
+      router.push(`/properties?q=${encodeURIComponent(trimmed)}`);
+    } else {
+      router.push('/properties');
+    }
   };
 
   return (
