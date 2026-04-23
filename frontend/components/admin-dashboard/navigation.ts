@@ -134,9 +134,9 @@ export function getAdminBreadcrumbItems(pathname: string): Array<{
       index === segments.length - 1
         ? undefined
         : `/${pathname
-          .split('/')
-          .filter(Boolean)
-          .slice(0, index + 1)
-          .join('/')}`,
+            .split('/')
+            .filter(Boolean)
+            .slice(0, index + 1)
+            .join('/')}`,
   }));
 }
