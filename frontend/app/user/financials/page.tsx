@@ -21,6 +21,8 @@ interface RevenueDataPoint {
 
 interface Transaction {
   hash: string;
+  /** Stable route segment for escrow preview detail (avoids hash/ellipsis mismatch). */
+  escrowPreviewId?: string;
   date: string;
   type: string;
   property: string;
@@ -83,6 +85,7 @@ const transactions: Transaction[] = [
   },
   {
     hash: 'GLMN5R7T…8C4D',
+    escrowPreviewId: 'escrow-deposit-refund-ikoyi',
     date: 'Jun 05, 2025',
     type: 'Deposit Refund',
     property: 'Glover Road, Ikoyi',
@@ -138,6 +141,7 @@ const transactions: Transaction[] = [
   },
   {
     hash: 'GABD6E9F…4M5N',
+    escrowPreviewId: 'escrow-security-adeola',
     date: 'Apr 28, 2025',
     type: 'Security Deposit',
     property: '101 Adeola Odeku St',
@@ -211,9 +215,16 @@ const StatusBadge = ({ status }: { status: string }) => (
   </span>
 );
 
-const EscrowPreviewLink = ({ tx }: { tx: Transaction }) => (
+const ESCROW_THUMB_FALLBACK =
+  'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=160&q=80';
+
+const EscrowPreviewLink = ({ tx }: { tx: Transaction }) => {
+  const previewSegment = encodeURIComponent(
+    tx.escrowPreviewId ?? tx.hash,
+  );
+  return (
   <Link
-    href={`/user/financials/escrows/${encodeURIComponent(tx.hash)}`}
+    href={`/user/financials/escrows/${previewSegment}`}
     className="inline-flex items-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-300 hover:bg-blue-500/20 hover:text-white transition-all"
     aria-label={`Preview escrow for ${tx.property}`}
   >
@@ -224,6 +235,10 @@ const EscrowPreviewLink = ({ tx }: { tx: Transaction }) => (
         alt=""
         className="h-full w-full object-cover"
         loading="lazy"
+        referrerPolicy="no-referrer"
+        onError={(e) => {
+          e.currentTarget.src = ESCROW_THUMB_FALLBACK;
+        }}
       />
       <span className="absolute inset-0 flex items-center justify-center bg-slate-950/25">
         <ShieldCheck size={14} className="text-white" />
@@ -234,7 +249,8 @@ const EscrowPreviewLink = ({ tx }: { tx: Transaction }) => (
       Preview
     </span>
   </Link>
-);
+  );
+};
 
 // ─── Metric Card ──────────────────────────────────────────────────────────────
 

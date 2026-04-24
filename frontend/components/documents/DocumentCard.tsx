@@ -77,6 +77,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
           {document.thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
+              referrerPolicy="no-referrer"
               src={document.thumbnailUrl}
               alt={document.name}
               className="w-12 h-12 rounded-lg object-cover"

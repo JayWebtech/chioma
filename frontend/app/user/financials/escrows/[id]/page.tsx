@@ -14,7 +14,7 @@ interface PageProps {
 }
 
 interface EscrowPreview {
-  hash: string;
+  displayHash: string;
   property: string;
   amount: number;
   status: string;
@@ -23,9 +23,37 @@ interface EscrowPreview {
   image: string;
 }
 
-const ESCROW_PREVIEWS: EscrowPreview[] = [
+const fallbackImage =
+  'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80';
+
+/** Stable slugs used by the financials ledger preview links. */
+const ESCROW_BY_SLUG: Record<string, EscrowPreview> = {
+  'escrow-deposit-refund-ikoyi': {
+    displayHash: 'GLMN5R7T…8C4D',
+    property: 'Glover Road, Ikoyi',
+    amount: 500000,
+    status: 'Processed',
+    date: 'Jun 05, 2025',
+    type: 'Deposit Refund',
+    image:
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
+  },
+  'escrow-security-adeola': {
+    displayHash: 'GABD6E9F…4M5N',
+    property: '101 Adeola Odeku St',
+    amount: 2500000,
+    status: 'Held',
+    date: 'Apr 28, 2025',
+    type: 'Security Deposit',
+    image:
+      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80',
+  },
+};
+
+/** Legacy entries keyed by normalized display hash (alphanumeric only). */
+const ESCROW_BY_NORMALIZED_HASH: EscrowPreview[] = [
   {
-    hash: 'GLMN5R7T\u20268C4D',
+    displayHash: 'GLMN5R7T…8C4D',
     property: 'Glover Road, Ikoyi',
     amount: 500000,
     status: 'Processed',
@@ -35,7 +63,7 @@ const ESCROW_PREVIEWS: EscrowPreview[] = [
       'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
   },
   {
-    hash: 'GABD6E9F\u20264M5N',
+    displayHash: 'GABD6E9F…4M5N',
     property: '101 Adeola Odeku St',
     amount: 2500000,
     status: 'Held',
@@ -46,28 +74,32 @@ const ESCROW_PREVIEWS: EscrowPreview[] = [
   },
 ];
 
-const fallbackImage =
-  'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80';
-
 function normalizeHash(value: string): string {
   return value.replace(/[^a-z0-9]/gi, '').toUpperCase();
 }
 
 function findPreview(id: string): EscrowPreview {
   const decodedId = decodeURIComponent(id);
-  return (
-    ESCROW_PREVIEWS.find(
-      (preview) => normalizeHash(preview.hash) === normalizeHash(decodedId),
-    ) ?? {
-      hash: decodedId,
-      property: 'Security deposit escrow',
-      amount: 0,
-      status: 'Pending',
-      date: 'Pending confirmation',
-      type: 'Escrow Preview',
-      image: fallbackImage,
-    }
+  const bySlug = ESCROW_BY_SLUG[decodedId];
+  if (bySlug) {
+    return bySlug;
+  }
+  const norm = normalizeHash(decodedId);
+  const legacy = ESCROW_BY_NORMALIZED_HASH.find(
+    (p) => normalizeHash(p.displayHash) === norm,
   );
+  if (legacy) {
+    return legacy;
+  }
+  return {
+    displayHash: decodedId,
+    property: 'Security deposit escrow',
+    amount: 0,
+    status: 'Pending',
+    date: 'Pending confirmation',
+    type: 'Escrow Preview',
+    image: fallbackImage,
+  };
 }
 
 export default async function EscrowDetailPage({ params }: PageProps) {
@@ -91,6 +123,7 @@ export default async function EscrowDetailPage({ params }: PageProps) {
             src={escrow.image}
             alt={`${escrow.property} escrow preview`}
             className="absolute inset-0 h-full w-full object-cover"
+            referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-slate-950/65" />
           <div className="relative z-10 flex min-h-[320px] flex-col justify-end p-6 sm:p-8">
@@ -142,7 +175,7 @@ export default async function EscrowDetailPage({ params }: PageProps) {
 
         <div className="border-t border-white/10 px-6 py-5 sm:px-8">
           <p className="break-all font-mono text-xs text-blue-200/50">
-            Stellar transaction: {escrow.hash}
+            Stellar transaction: {escrow.displayHash}
           </p>
         </div>
       </section>
