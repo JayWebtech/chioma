@@ -79,7 +79,8 @@ const dashboardPayments = [
 
 const dashboardDisputes = [
   {
-    id: 'DSP-901',
+    id: 'dis-001',
+    disputeReference: 'DSP-2026-001',
     property: 'Sunset Apartments, Unit 4B',
     status: 'Open',
     previewImage:
@@ -378,9 +379,22 @@ export default function UserDashboardOverview() {
                 </div>
                 <Link
                   href="/user/payments"
-                  className="inline-flex items-center gap-1 rounded-xl border border-blue-500/30 bg-blue-500/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-300 hover:bg-blue-500/20 transition-colors"
+                  className="inline-flex items-center gap-1 rounded-xl border border-blue-500/30 bg-blue-500/10 px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-300 hover:bg-blue-500/20 transition-colors"
                   aria-label={`Preview payment ${payment.id}`}
                 >
+                  <span className="relative h-5 w-5 overflow-hidden rounded-md border border-white/10 bg-white/5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={payment.previewImage}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.src = DASHBOARD_IMAGE_FALLBACK;
+                      }}
+                    />
+                  </span>
                   <Eye size={12} />
                   Preview
                 </Link>
@@ -426,15 +440,28 @@ export default function UserDashboardOverview() {
                       {dispute.property}
                     </p>
                     <p className="text-xs text-blue-200/50">
-                      {dispute.id} · {dispute.status}
+                      {dispute.disputeReference} · {dispute.status}
                     </p>
                   </div>
                 </div>
                 <Link
                   href={`/user/disputes/${dispute.id}`}
-                  className="inline-flex items-center gap-1 rounded-xl border border-blue-500/30 bg-blue-500/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-300 hover:bg-blue-500/20 transition-colors"
-                  aria-label={`Preview dispute ${dispute.id}`}
+                  className="inline-flex items-center gap-1 rounded-xl border border-blue-500/30 bg-blue-500/10 px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-300 hover:bg-blue-500/20 transition-colors"
+                  aria-label={`Preview dispute ${dispute.disputeReference}`}
                 >
+                  <span className="relative h-5 w-5 overflow-hidden rounded-md border border-white/10 bg-white/5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={dispute.previewImage}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.src = DASHBOARD_IMAGE_FALLBACK;
+                      }}
+                    />
+                  </span>
                   <Eye size={12} />
                   Preview
                 </Link>
